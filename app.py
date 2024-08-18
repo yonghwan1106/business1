@@ -5,7 +5,7 @@ import pandas as pd
 from typing import Optional
 
 # 인증키를 직접 코드에 삽입
-AUTH_KEY = "b2f7660c-9fd445259d2e-6cd14440ec35"  # 여기에 실제 인증키를 입력하세요
+AUTH_KEY = "b2f7660c-9fd4-4525-9d2e-6cd14440ec35"  # 여기에 실제 인증키를 입력하세요
 
 def get_job_listings(start_page: int = 1, display: int = 10) -> Optional[pd.DataFrame]:
     base_url = "https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do"
