@@ -57,6 +57,10 @@ st.title("고용24 채용정보 검색")
 start_page = st.sidebar.number_input("시작 페이지", min_value=1, value=1)
 display = st.sidebar.number_input("표시 개수", min_value=1, max_value=100, value=10)
 
+# 검색 결과와 메시지를 저장할 변수 초기화
+df = None
+message = ""
+
 if st.sidebar.button("검색", use_container_width=True):
     with st.spinner("데이터를 불러오는 중..."):
         df, message = get_job_listings(start_page, display)
