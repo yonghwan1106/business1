@@ -2,12 +2,12 @@ import streamlit as st
 import requests
 import xml.etree.ElementTree as ET
 import pandas as pd
-from typing import Optional
+from typing import Optional, Tuple
 
 # 인증키를 직접 코드에 삽입
 AUTH_KEY = "b2f7660c-9fd4-4525-9d2e-6cd14440ec35"  # 여기에 실제 인증키를 입력하세요
 
-def get_job_listings(start_page: int = 1, display: int = 10) -> Optional[pd.DataFrame]:
+def get_job_listings(start_page: int = 1, display: int = 10) -> Tuple[Optional[pd.DataFrame], str]:
     base_url = "https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do"
     
     params = {
@@ -22,20 +22,14 @@ def get_job_listings(start_page: int = 1, display: int = 10) -> Optional[pd.Data
         response = requests.get(base_url, params=params, timeout=10)
         response.raise_for_status()
     except requests.RequestException as e:
-        st.error(f"API 요청 실패: {e}")
-        return None
+        return None, f"API 요청 실패: {e}"
 
     root = ET.fromstring(response.content)
     
-    # API 응답 전체를 로그로 출력
-    st.text("API 응답 내용:")
-    st.text(ET.tostring(root, encoding='unicode'))
-    
     # 에러 메시지 확인
-    error_msg = root.find('.//errorMsg')
-    if error_msg is not None:
-        st.error(f"API 에러: {error_msg.text}")
-        return None
+    error_elem = root.find('.//error')
+    if error_elem is not None:
+        return None, f"API 에러: {error_elem.text}"
     
     job_data = []
     for item in root.findall('.//wantedInfo'):
@@ -51,10 +45,9 @@ def get_job_listings(start_page: int = 1, display: int = 10) -> Optional[pd.Data
         job_data.append(job)
     
     if not job_data:
-        st.warning("API에서 반환된 채용 정보가 없습니다.")
-        return None
+        return None, "API에서 반환된 채용 정보가 없습니다."
     
-    return pd.DataFrame(job_data)
+    return pd.DataFrame(job_data), "성공"
 
 # Streamlit 앱 시작
 st.set_page_config(page_title="고용24 채용정보 검색", page_icon="🔍", layout="wide")
@@ -66,9 +59,9 @@ display = st.sidebar.number_input("표시 개수", min_value=1, max_value=100, v
 
 if st.sidebar.button("검색", use_container_width=True):
     with st.spinner("데이터를 불러오는 중..."):
-        df = get_job_listings(start_page, display)
+        df, message = get_job_listings(start_page, display)
     
-    if df is not None and not df.empty:
+    if df is not None:
         st.success("데이터를 성공적으로 불러왔습니다!")
         st.dataframe(df, use_container_width=True)
 
@@ -97,5 +90,10 @@ if st.sidebar.button("검색", use_container_width=True):
             file_name="job_listings.csv",
             mime="text/csv",
         )
-    elif df is None:
-        st.warning("검색 결과가 없습니다. API 응답을 확인해 주세요.")
+    else:
+        st.error(f"검색 결과가 없습니다. 원인: {message}")
+        st.info("API 키를 확인하고 고용24 사이트에서 서비스 신청 상태를 확인해주세요.")
+
+# API 응답 전체를 로그로 출력 (디버깅 목적)
+if st.checkbox("API 응답 내용 보기"):
+    st.text(f"API 응답 내용:\n{message}")
