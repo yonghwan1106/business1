@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 AUTH_KEY = "b2f7660c-9fd4-4525-9d2e-6cd14440ec35"  # 여기에 실제 인증키를 입력하세요
 
 def get_job_listings(start_page: int = 1, display: int = 10) -> Tuple[Optional[pd.DataFrame], str]:
-    base_url = "https://www.work24.go.kr/cm/openApi/call/wk/callOpenApiSvcInfo210L01.do"
+    base_url = "http://openapi.work.go.kr/opi/opi/opia/wantedApi.do"
     
     params = {
         "authKey": AUTH_KEY,
