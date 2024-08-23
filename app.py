@@ -101,3 +101,6 @@ if st.sidebar.button("검색", use_container_width=True):
 # API 응답 전체를 로그로 출력 (디버깅 목적)
 if st.checkbox("API 응답 내용 보기"):
     st.text(f"API 응답 내용:\n{message}")
+
+# 데이터 출처 표시
+st.markdown("데이터 출처: 고용노동부")
